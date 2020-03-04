@@ -11,6 +11,7 @@ const GET_MOVIES = gql`
     movies {
       id
       medium_cover_image
+      isLiked @client
     }
   }
 `;
@@ -23,7 +24,7 @@ const Container = styled.div`
 `;
 
 const Header = styled.header`
-  background-image: linear-gradient(-45deg, #a01ef2, #d299f5);
+  background-image: linear-gradient(-45deg, #7207b5, #e2b6fd);
   height: 45vh;
   color: white;
   display: flex;
@@ -60,7 +61,7 @@ const Movies = styled.div`
 `;
 
 export default () => {
-  const { loading, error, data } = useQuery(GET_MOVIES);
+  const { loading, data } = useQuery(GET_MOVIES);
   return (
     <Container>
       <Header>
@@ -71,7 +72,12 @@ export default () => {
       {!loading && data.movies && (
         <Movies>
           {data.movies.map(m => (
-            <Movie keys={m.id} id={m.id} bg={m.medium_cover_image} />
+            <Movie
+              keys={m.id}
+              id={m.id}
+              isLiked={m.isLiked}
+              bg={m.medium_cover_image}
+            />
           ))}
         </Movies>
       )}

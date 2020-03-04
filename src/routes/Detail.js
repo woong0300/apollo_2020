@@ -7,6 +7,8 @@ import styled from "styled-components";
 const GET_MOVIE = gql`
   query getMovie($id: Int!) {
     movie(id: $id) {
+      id
+      isLiked @client
       title
       medium_cover_image
       language
@@ -15,9 +17,10 @@ const GET_MOVIE = gql`
     }
   }
 `;
+
 const Container = styled.div`
   height: 100vh;
-  background-image: linear-gradient(-45deg, #a01ef2, #d299f5);
+  background-image: linear-gradient(-60deg, #7207b5, #e2b6fd);
   width: 100%;
   display: flex;
   justify-content: space-around;
@@ -56,17 +59,23 @@ const Poster = styled.div`
 //React Apollo의 최고!! - cache가 있어서 뒤로 갔다 다시오면 로딩이 없다!!
 export default () => {
   let { id } = useParams(); //잘못된 부분이였는데 직접 찾아냈다.
-  id = parseInt(id);
   const { loading, data } = useQuery(GET_MOVIE, {
-    variables: { id }
+    variables: { id: parseInt(id) }
   });
   return (
     //이 부분이 Detail.js에서 제일 중요한 부분!! 제일 오류를 많이내는 부분!!
     //{data.movie.title}와 같이 그냥 가져다 쓰면 로딩이 아직 안되서 오류!!
     //삼항연산자를 써서 저런 형태로 가져와야 이를 방지할 수 있다!!
+    // Optional Chainig : 삼항연산자 대신에 저렇게 짧아진다.
+    // <Poster bg={data?.movie?.medium_cover_image}></Poster>
     <Container>
       <Column>
-        <Title>{loading ? "Loading..." : data.movie.title}</Title>
+        <Title>
+          {loading
+            ? "Loading..."
+            : `${data.movie.title} ${data.movie.isLiked ? "O" : "X"}`}
+          {/*Apollo는 isLiked가 home에서 detail로 전달되는지 몰라 */}
+        </Title>
         {!loading && data.movie && (
           <>
             <Subtitle>
@@ -76,8 +85,9 @@ export default () => {
           </>
         )}
       </Column>
-      {/* Optional Chainig : 삼항연산자 대신에 저렇게 짧아진다. */}
-      <Poster bg={data?.movie?.medium_cover_image}></Poster>
+      <Poster
+        bg={data && data.movie ? data.movie.medium_cover_image : ""}
+      ></Poster>
     </Container>
   );
 };
